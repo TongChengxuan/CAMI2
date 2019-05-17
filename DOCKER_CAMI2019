@@ -1,0 +1,100 @@
+############################################################
+# Dockerfile to build assembly pipeline for CAMI2019
+# Based on miniconda
+############################################################
+
+FROM continuumio/miniconda
+MAINTAINER Chenhao Li (lich@gis.a-star.edu.sg)
+
+RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y git wget cpanminus build-essential r-base
+RUN apt install unzip
+################## BEGIN INSTALLATION ######################
+
+#maxbin2
+RUN apt-get install -y autoconf
+RUN wget -O /MaxBin-2.2.4.tar.gz https://sourceforge.net/projects/maxbin2/files/MaxBin-2.2.4.tar.gz/download && \
+    tar xvzf MaxBin-2.2.4.tar.gz && \
+    rm /MaxBin-2.2.4.tar.gz && \
+    sed -i 's/wget/wget --no-check-certificate/g' MaxBin-2.2.4/buildapp && \
+    cd /MaxBin-2.2.4/src && make && cd .. &&\
+    /MaxBin-2.2.4/autobuild_auxiliary
+
+## Setup environments
+RUN conda config --add channels defaults && \
+    conda config --add channels bioconda && \
+    conda config --add channels conda-forge
+
+## dRep and checkM
+RUN conda create -n py27 python=2.7 checkm-genome=1.0.7
+RUN conda create -n py35 python=3.5 drep=2.0.5
+RUN echo '#!/bin/bash\n/opt/conda/envs/py27/bin/checkm' > /usr/bin/checkm && \
+    chmod +x /usr/bin/checkm
+RUN echo '#!/bin/bash\n/opt/conda/envs/py35/bin/dRep' > /usr/bin/dRep && \
+    chmod +x /usr/bin/dRep
+
+## pilon, maxbin2 and java
+RUN wget -O /usr/bin/pilon-1.22.jar https://github.com/broadinstitute/pilon/releases/download/v1.22/pilon-1.22.jar
+RUN apt-get -y install openjdk-8-jdk
+
+## pplacer
+RUN wget https://github.com/matsen/pplacer/releases/download/v1.1.alpha19/pplacer-linux-v1.1.alpha19.zip && \
+    unzip pplacer-linux-v1.1.alpha19.zip && \
+    rm pplacer-linux-v1.1.alpha19.zip
+ENV PATH="/pplacer-Linux-v1.1.alpha19/:${PATH}"
+
+RUN apt-get install -y procps
+
+## kraken
+
+RUN wget -O /v0.10.5-beta.tar.gz https://github.com/DerrickWood/kraken/archive/v0.10.5-beta.tar.gz && \
+    tar xvzf /v0.10.5-beta.tar.gz && rm /v0.10.5-beta.tar.gz && \
+    mkdir /kraken && cd /kraken-0.10.5-beta && sh ./install_kraken.sh /kraken ; exit 0
+RUN rm -r /kraken-0.10.5-beta
+#RUN  cd /kraken-0.10.5-beta && sh ./install_kraken.sh ../kraken/; exit 0
+#rm -r /kraken-0.10.5-beta
+
+RUN pip install pandas
+
+ENV PATH="/kraken/:${PATH}"
+
+# checkm db
+RUN echo "/db/checkm" |  checkm data setRoot /db/checkm/
+
+# prodigal
+RUN git clone https://github.com/hyattpd/Prodigal.git &&\
+    cd Prodigal/ && make install
+
+# CHECKM AND DREP
+RUN sed -i 's/dRep/dRep \$\@/g' /usr/bin/dRep
+RUN sed -i 's/checkm/checkm \$\@/g' /usr/bin/checkm
+
+# hmmer & db
+RUN apt install -y hmmer
+RUN cd /db/checkm/ && curl -L -O https://data.ace.uq.edu.au/public/CheckM_databases/checkm_data_2015_01_16.tar.gz && \
+    tar xzf checkm_data_2015_01_16.tar.gz
+
+#apt install Statistics/R.pm
+#RUN echo "/db/checkm" |  checkm data setRoot /db/checkm/
+RUN  yes | perl -MCPAN -e 'install IPC::Run'
+RUN  yes | perl -MCPAN -e 'install Regexp::Common'
+RUN  yes | perl -MCPAN -e 'install Statistics::R'
+
+# megahit
+RUN wget https://github.com/voutcn/megahit/releases/download/v1.2.3-beta/MEGAHIT-1.2.3-beta-Linux-static.tar.gz && \
+    tar zvxf MEGAHIT-1.2.3-beta-Linux-static.tar.gz && \
+    rm /MEGAHIT-1.2.3-beta-Linux-static.tar.gz
+
+##opera-ms
+
+RUN git clone --single-branch --branch OPERA-MS-CO-ASSEMBLY https://github.com/CSB5/OPERA-MS.git
+RUN cd /OPERA-MS; make
+RUN cd /OPERA-MS; perl OPERA-MS.pl sample_config.config TEST_INSTALLATION 2
+#RUN cd /OPERA-MS; perl OPERA-MS.pl sample_config.config 2
+ENV PATH="/OPERA-MS/utils/MUMmer3.23/:${PATH}"
+ENV PATH="/OPERA-MS/utils/:${PATH}"
+
+##################### INSTALLATION END #####################
+#ENTRYPOINT ["ls"]
+
+CMD ["ls", "/indata/"]
