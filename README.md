@@ -1,10 +1,10 @@
 # Docker file for cami2 challenge.
 
 # Introduction 
-to build docker images:
+to build docker images:\
 cat CAMI_2019/DOCKER_CAMI2019 | docker build  -t cami2019 -
 
-## Marine dataset assembly: \
+## Marine dataset assembly:
 docker run -v /path/to/raw/reads/:/rawdata/ \
 -v /path/to/store/longreads/:/long_reads/ \
 -v /path/to/store/deinterleaved/shortreads/:/short_reads/ \
@@ -37,4 +37,5 @@ docker run -v /path/to/raw/reads/:/rawdata/ \
 /path/to/store/longreads/ \
 /path/to/store/shortreads/ \
 path/to/output/ \
-should be created and emptied before running the pipeline
+should be created and emptied before running the pipeline\
+Attached volume should be named as stated above
