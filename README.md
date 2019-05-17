@@ -1,6 +1,7 @@
 # Docker file for cami2 challenge.
 
 # Introduction 
+
 ## to build docker images
 cat CAMI_2019/DOCKER_CAMI2019 | docker build  -t cami2019 -
 
