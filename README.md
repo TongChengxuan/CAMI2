@@ -32,12 +32,13 @@ docker run -v /path/to/raw/reads/:/rawdata/ \
 -v /path/to/store/longreads/:/long_reads/ \
 -v /path/to/store/deinterleaved/shortreads/:/short_reads/ \
 -v /path/to/output/:/outdata/ \
+-v /path/to/kraken_db/:/kraken_db/ \
 -i -t cami2019 python /SCRIPT/start_pipeline.py -d strain_madness -co yes
 
 # NOTE
 /path/to/store/longreads/ \
 /path/to/store/shortreads/ \
-path/to/output/ \
+/path/to/output/ \
 should be created and emptied before running the pipeline\
 \
 Attached volume should be named as stated above
