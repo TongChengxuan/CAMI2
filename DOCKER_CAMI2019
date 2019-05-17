@@ -5,9 +5,7 @@
 
 FROM continuumio/miniconda
 
-MAINTAINER: Chenhao Li (lich@gis.a-star.edu.sg)
-	    Denis Bertrand (bertrandd@gis.a-star.edu.sg)
-	    Chengxuan Tong (Tong_Chengxuan@gis.a-star.edu.sg)
+MAINTAINER Chenhao Li (lich@gis.a-star.edu.sg)
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git wget cpanminus build-essential r-base
@@ -92,11 +90,13 @@ RUN wget https://github.com/voutcn/megahit/releases/download/v1.2.3-beta/MEGAHIT
 
 RUN git clone --single-branch --branch OPERA-MS-CO-ASSEMBLY https://github.com/CSB5/OPERA-MS.git
 RUN cd /OPERA-MS; make
-RUN cd /OPERA-MS; perl OPERA-MS.pl sample_config.config TEST_INSTALLATION 2
+#RUN cd /OPERA-MS; perl OPERA-MS.pl sample_config.config TEST_INSTALLATION 2
 #RUN cd /OPERA-MS; perl OPERA-MS.pl sample_config.config 2
 ENV PATH="/OPERA-MS/utils/MUMmer3.23/:${PATH}"
 ENV PATH="/OPERA-MS/utils/:${PATH}"
 
+RUN wget https://www.dropbox.com/s/wwmked5jj4lwmal/script.tar.gz?dl=0 && \
+    tar xvzf script.tar.gz?dl=0 && rm script.tar.gz?dl=0 && chmod +x /SCRIPT/*
 ##################### INSTALLATION END #####################
 #ENTRYPOINT ["ls"]
 
