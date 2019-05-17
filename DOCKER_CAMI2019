@@ -4,7 +4,10 @@
 ############################################################
 
 FROM continuumio/miniconda
-MAINTAINER: Chenhao Li (lich@gis.a-star.edu.sg), Denis Bertrand (bertrandd@gis.a-star.edu.sg), Chengxuan Tong (Tong_Chengxuan@gis.a-star.edu.sg)
+
+MAINTAINER: Chenhao Li (lich@gis.a-star.edu.sg)
+	    Denis Bertrand (bertrandd@gis.a-star.edu.sg)
+	    Chengxuan Tong (Tong_Chengxuan@gis.a-star.edu.sg)
 
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git wget cpanminus build-essential r-base
